@@ -116,6 +116,7 @@
             text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
         }
 
+        /* Main Orange Button */
         .btn-primary {
             background: var(--color-orange); color: var(--color-white); border: none; padding: 14px;
             border-radius: 50px; font-family: var(--font-primary); font-size: 16px; font-weight: 700;
@@ -129,6 +130,60 @@
         }
         @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
         .btn-primary:hover { background: #FF5522; transform: translateY(-2px); }
+
+        /* Simple Button (For Hints) */
+        .btn-simple {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: var(--font-primary);
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+            margin-top: 5px;
+        }
+        .btn-simple:hover {
+            border-color: var(--color-white);
+            color: var(--color-white);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* --- HINT IMAGE STYLES --- */
+        
+        /* 1. Sidebar Hint (Desktop) */
+        .sidebar-hint-box {
+            display: none; 
+            margin-top: 10px;
+            border: 2px solid var(--color-orange);
+            border-radius: 8px;
+            overflow: hidden;
+            animation: fadeIn 0.3s;
+            width: 100%;
+        }
+        .sidebar-hint-box img { width: 100%; display: block; }
+        .sidebar-hint-box.visible { display: block; }
+
+        /* 2. Field Hint (Mobile) */
+        #field-hint {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0; 
+            pointer-events: none; 
+            z-index: 1; 
+            transition: opacity 0.3s;
+            border-radius: 4px;
+        }
+        #field-hint.visible {
+            opacity: 0.3; /* 30% visibility */
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
 
         /* --- GAME AREA --- */
         #game-area {
@@ -167,10 +222,22 @@
             .brand-container { margin-bottom: 0; width: 100%; }
             .controls-wrapper { flex-direction: row; flex-wrap: wrap; width: 100%; gap: 10px; align-items: center; }
             .input-group { flex: 1; min-width: 120px; }
-            .avatar-wrapper { display: none; } 
-            .timer-display { margin-top: 0; font-size: 20px; padding: 5px 10px; min-width: 80px; }
-            .btn-primary { width: auto; flex-grow: 1; font-size: 14px; padding: 10px; }
-            .volume-control { width: 100%; }
+            .avatar-wrapper { display: flex; order: 1; } 
+            .avatar-upload { width: 60px; height: 60px; }
+            .avatar-placeholder span { font-size: 18px; }
+            .avatar-placeholder small { font-size: 8px; }
+            
+            .input-group:nth-child(2) { order: 2; } /* Nickname */
+            
+            .volume-control { width: 100%; order: 3; margin-top: 0; }
+            /* Simple Button styling on mobile to fit nicely */
+            .btn-simple { width: auto; order: 3; flex: 1; margin-top: 0; }
+            
+            .timer-display { margin-top: 0; font-size: 20px; padding: 5px 10px; min-width: 60px; order: 4; }
+            .btn-primary { width: auto; flex-grow: 1; font-size: 14px; padding: 10px; order: 5; }
+            
+            /* Hide Sidebar hint on mobile */
+            .sidebar-hint-box { display: none !important; }
         }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
@@ -243,6 +310,12 @@
                 <input type="range" id="vol-slider" class="volume-slider" min="0" max="100" value="5">
             </div>
 
+            <button class="btn-simple" onclick="toggleHint()">Show Hint</button>
+
+            <div id="sidebar-hint" class="sidebar-hint-box">
+                <img src="puzzle.png" alt="Hint">
+            </div>
+
             <div class="timer-display" id="timer">00:00</div>
             
             <button class="btn-primary" onclick="attemptStartGame()">Start Game</button>
@@ -250,6 +323,8 @@
     </aside>
 
     <main id="game-area">
+        <img id="field-hint" src="puzzle.png" alt="Hint Background">
+        
         <div id="board-guide"></div>
     </main>
 
@@ -264,7 +339,7 @@
         </div>
     </div>
 
-    <audio id="bg-music" loop>
+    <audio id="bg-music" loop autoplay>
         <source src="Happy New Year.mp3" type="audio/mpeg">
     </audio>
 
@@ -294,11 +369,41 @@
         bgMusic.volume = 0.05; 
         volSlider.addEventListener('input', (e) => { bgMusic.volume = e.target.value / 100; });
 
+        window.addEventListener('load', () => {
+            bgMusic.play().catch(() => {
+                const unlockAudio = () => {
+                    bgMusic.play();
+                    document.removeEventListener('click', unlockAudio);
+                    document.removeEventListener('touchstart', unlockAudio);
+                };
+                document.body.addEventListener('click', unlockAudio);
+                document.body.addEventListener('touchstart', unlockAudio);
+            });
+        });
+
         const gameArea = document.getElementById('game-area');
         const guide = document.getElementById('board-guide');
+        const fieldHint = document.getElementById('field-hint');
+        const sidebarHint = document.getElementById('sidebar-hint');
         const imgObj = new Image();
         imgObj.crossOrigin = "Anonymous"; 
         imgObj.src = IMAGE_SRC;
+
+        // --- HINT TOGGLE LOGIC ---
+        let isHintVisible = false;
+        function toggleHint() {
+            isHintVisible = !isHintVisible;
+            if (isHintVisible) {
+                if (window.innerWidth > 850) {
+                    sidebarHint.classList.add('visible');
+                } else {
+                    fieldHint.classList.add('visible');
+                }
+            } else {
+                sidebarHint.classList.remove('visible');
+                fieldHint.classList.remove('visible');
+            }
+        }
 
         function startBackgroundSnow() {
             const flakeCount = 20; 
@@ -342,8 +447,14 @@
         imgObj.onerror = () => { console.error("Could not load puzzle.png"); };
         
         function updateGuide() {
-            guide.style.width = (COLS * BASE_SIZE) + 'px';
-            guide.style.height = (ROWS * BASE_SIZE) + 'px';
+            const w = (COLS * BASE_SIZE) + 'px';
+            const h = (ROWS * BASE_SIZE) + 'px';
+            
+            guide.style.width = w;
+            guide.style.height = h;
+            
+            fieldHint.style.width = w;
+            fieldHint.style.height = h;
         }
 
         function loadAvatar(input) {
