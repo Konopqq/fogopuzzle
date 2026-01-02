@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FOGO Christmas Puzzles</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700;800&family=Funnel+Display:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700;800;900&family=Funnel+Display:wght@300;500;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -16,9 +15,7 @@
             --color-white: #FFFFFF;
             --color-gray: #F2F2F2;
             --color-ice: rgba(200, 230, 255, 0.15);
-            
             --sidebar-width: 320px;
-            
             --font-primary: 'Funnel Display', sans-serif;
             --font-secondary: 'DM Sans', sans-serif;
         }
@@ -36,7 +33,6 @@
             user-select: none;
         }
 
-        /* --- LARGE SCREENS ADAPTATION --- */
         @media (min-width: 1600px) {
             :root {
                 --sidebar-width: 420px;
@@ -48,7 +44,6 @@
             .brand-logo { max-width: 180px !important; }
         }
 
-        /* --- CHRISTMAS GARLAND --- */
         .garland-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 30px; z-index: 500;
             pointer-events: none; display: flex; justify-content: space-around; overflow: hidden;
@@ -62,7 +57,6 @@
         .light:nth-child(4n) { background: #ffd700; box-shadow: 0 5px 15px rgba(255, 215, 0, 0.8); animation-delay: 0.2s; }
         @keyframes glow { from { opacity: 0.4; transform: scale(0.8); } to { opacity: 1; transform: scale(1.1); } }
 
-        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width);
             background: rgba(12, 24, 37, 0.95);
@@ -87,7 +81,6 @@
             margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
-        /* Avatar */
         .avatar-wrapper { display: flex; justify-content: flex-start; }
         .avatar-upload {
             width: 80px; height: 80px; border-radius: 50%;
@@ -109,7 +102,6 @@
         input[type="text"]:focus { border-color: var(--color-orange); background: rgba(255,255,255,0.08); }
         input[type="text"].error { border-color: var(--color-orange); animation: shake 0.4s; }
 
-        /* Volume */
         .volume-control { margin-top: 5px; }
         .volume-slider {
             -webkit-appearance: none; width: 100%; height: 6px;
@@ -143,7 +135,6 @@
         }
         .btn-primary:hover { background: #FF5522; transform: translateY(-2px); }
 
-        /* Simple Button */
         .btn-simple {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
@@ -164,7 +155,6 @@
             background: rgba(255,255,255,0.05);
         }
 
-        /* Hint Image */
         .sidebar-hint-box {
             display: none; 
             margin-top: 15px;
@@ -188,7 +178,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- GAME AREA --- */
         #game-area {
             flex-grow: 1; position: relative;
             background: radial-gradient(circle at center, #132233 0%, var(--color-dark-blue) 100%);
@@ -215,7 +204,6 @@
             z-index: 9999 !important; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.7)); transform: scale(1.05);
         }
 
-        /* --- MOBILE --- */
         @media (max-width: 850px) {
             body { flex-direction: column; }
             .sidebar {
@@ -346,12 +334,10 @@
     <canvas id="resultCanvas"></canvas>
 
     <script>
-        // === CONFIGURATION ===
         const IMAGE_SRC = 'puzzle.png';
         const COLS = 8;
         const ROWS = 6;
         
-        // Initial values
         let BASE_SIZE = 80; 
         let TAB = 18;       
         let SNAP_DIST = 20;
@@ -427,23 +413,19 @@
         }
         startBackgroundSnow();
 
-        // --- SIZE CALCULATION ---
         function calculateSizes() {
             const screenW = window.innerWidth;
             
             if (screenW > 1600) {
-                // Large monitors
                 BASE_SIZE = 110; 
                 TAB = 24;
                 SNAP_DIST = 30;
             } else if (screenW < 800) {
-                // Mobile
                 BASE_SIZE = Math.floor((screenW - 40) / COLS);
                 if (BASE_SIZE > 50) BASE_SIZE = 50;
                 TAB = BASE_SIZE * 0.22;
                 SNAP_DIST = BASE_SIZE * 0.4;
             } else {
-                // Desktop
                 BASE_SIZE = 80;
                 TAB = 18;
                 SNAP_DIST = 20;
@@ -798,13 +780,12 @@
 
             ctx.drawImage(imgObj, 0, 0);
 
-            const padding = 50;
-            const bottomY = canvas.height - padding;
-            let textX = padding;
+            const bottomY = canvas.height * 0.82;
+            let textX = 50; 
 
             if (userAvatarImg) {
                 const avSize = 120;
-                const avX = padding;
+                const avX = 50;
                 const avY = bottomY - avSize;
                 ctx.save();
                 ctx.beginPath();
@@ -824,15 +805,17 @@
             ctx.textAlign = "left";
             ctx.textBaseline = "bottom";
 
-            // Nickname - Bold, Dark Blue, No Outline
-            ctx.font = "700 52px 'DM Sans', sans-serif"; 
-            ctx.fillStyle = "#0C1825"; 
-            ctx.fillText(nick, textX, bottomY - 60);
+            ctx.font = "900 64px 'DM Sans', sans-serif"; 
+            ctx.fillStyle = "#0C1825";
+            ctx.strokeStyle = "#0C1825"; ctx.lineWidth = 2; 
+            ctx.strokeText(nick, textX, bottomY - 65);
+            ctx.fillText(nick, textX, bottomY - 65);
 
-            // Time - Bold, Orange, No Outline
-            ctx.font = "700 40px 'Funnel Display', sans-serif"; 
+            ctx.font = "800 50px 'Funnel Display', sans-serif"; 
             ctx.fillStyle = "#FF3D00";
-            ctx.fillText("TIME: " + time, textX, bottomY - 15);
+            ctx.strokeStyle = "#FF3D00"; ctx.lineWidth = 2; 
+            ctx.strokeText("TIME: " + time, textX, bottomY - 10);
+            ctx.fillText("TIME: " + time, textX, bottomY - 10);
 
             const link = document.createElement('a');
             link.download = `FOGO_Puzzle_${nick}.png`;
