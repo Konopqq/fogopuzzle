@@ -17,9 +17,7 @@
             --color-gray: #F2F2F2;
             --color-ice: rgba(200, 230, 255, 0.15);
             
-            /* Default Sidebar Width */
             --sidebar-width: 320px;
-            
             --font-primary: 'Funnel Display', sans-serif;
             --font-secondary: 'DM Sans', sans-serif;
         }
@@ -40,7 +38,7 @@
         /* --- LARGE SCREENS ADAPTATION --- */
         @media (min-width: 1600px) {
             :root {
-                --sidebar-width: 420px; /* Wider sidebar for big screens */
+                --sidebar-width: 420px;
             }
             body { font-size: 18px; }
             .timer-display { font-size: 42px !important; }
@@ -145,7 +143,7 @@
         @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
         .btn-primary:hover { background: #FF5522; transform: translateY(-2px); }
 
-        /* Simple Hint Button */
+        /* Simple Button */
         .btn-simple {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
@@ -166,16 +164,14 @@
             background: rgba(255,255,255,0.05);
         }
 
-        /* --- HINT IMAGE STYLES --- */
+        /* Hint Image */
         .sidebar-hint-box {
             display: none; 
             margin-top: 15px;
-            border: 3px solid var(--color-orange); /* More visible border */
+            border: 3px solid var(--color-orange);
             border-radius: 12px;
             overflow: hidden;
             animation: fadeIn 0.3s;
-            
-            /* Making it 90% of sidebar width for better visibility */
             width: 90%;
             margin-left: auto;
             margin-right: auto;
@@ -355,7 +351,7 @@
         const COLS = 8;
         const ROWS = 6;
         
-        // Initial values (will be recalculated)
+        // Initial values
         let BASE_SIZE = 80; 
         let TAB = 18;       
         let SNAP_DIST = 20;
@@ -393,7 +389,6 @@
         imgObj.crossOrigin = "Anonymous"; 
         imgObj.src = IMAGE_SRC;
 
-        // --- HINT TOGGLE LOGIC ---
         let isHintVisible = false;
         function toggleHint() {
             isHintVisible = !isHintVisible;
@@ -430,10 +425,9 @@
             gameArea.appendChild(flake);
             setTimeout(() => { flake.remove(); }, duration * 1000);
         }
-        
         startBackgroundSnow();
 
-        // --- SIZE CALCULATION (Mobile vs Desktop vs Large) ---
+        // --- SIZE CALCULATION ---
         function calculateSizes() {
             const screenW = window.innerWidth;
             
@@ -449,20 +443,16 @@
                 TAB = BASE_SIZE * 0.22;
                 SNAP_DIST = BASE_SIZE * 0.4;
             } else {
-                // Standard Desktop
+                // Desktop
                 BASE_SIZE = 80;
                 TAB = 18;
                 SNAP_DIST = 20;
             }
         }
 
-        imgObj.onload = () => { 
-            calculateSizes(); // init calc
-            updateGuide(); 
-        };
+        imgObj.onload = () => { calculateSizes(); updateGuide(); };
         imgObj.onerror = () => { console.error("Could not load puzzle.png"); };
         
-        // Recalculate on resize
         window.addEventListener('resize', () => {
             calculateSizes();
             updateGuide();
@@ -471,10 +461,8 @@
         function updateGuide() {
             const w = (COLS * BASE_SIZE) + 'px';
             const h = (ROWS * BASE_SIZE) + 'px';
-            
             guide.style.width = w;
             guide.style.height = h;
-            
             fieldHint.style.width = w;
             fieldHint.style.height = h;
         }
@@ -491,7 +479,6 @@
                     preview.style.display = 'block';
                     placeholder.style.display = 'none';
                     container.classList.remove('error');
-                    
                     userAvatarImg = new Image();
                     userAvatarImg.src = e.target.result;
                 }
@@ -811,8 +798,6 @@
 
             ctx.drawImage(imgObj, 0, 0);
 
-            // Removed Gradient block here to remove darkening
-
             const padding = 50;
             const bottomY = canvas.height - padding;
             let textX = padding;
@@ -836,22 +821,16 @@
                 textX += avSize + 40;
             }
 
-            // Text with Stroke to make it readable without background
-            ctx.textAlign = "left";
-            ctx.textBaseline = "bottom";
-
-            // Nickname
             ctx.font = "700 48px 'DM Sans', sans-serif";
-            ctx.strokeStyle = "rgba(0,0,0,0.8)"; 
-            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#FFFFFF"; 
+            ctx.lineWidth = 5;
             ctx.strokeText(nick, textX, bottomY - 60);
-            ctx.fillStyle = "#FFFFFF";
+            ctx.fillStyle = "#0C1825"; 
             ctx.fillText(nick, textX, bottomY - 60);
 
-            // Time
             ctx.font = "500 36px 'Funnel Display', sans-serif";
-            ctx.strokeStyle = "rgba(0,0,0,0.8)"; 
-            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#FFFFFF"; 
+            ctx.lineWidth = 5;
             ctx.strokeText("TIME: " + time, textX, bottomY - 15);
             ctx.fillStyle = "#FF3D00";
             ctx.fillText("TIME: " + time, textX, bottomY - 15);
