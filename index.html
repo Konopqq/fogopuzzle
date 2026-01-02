@@ -17,7 +17,9 @@
             --color-gray: #F2F2F2;
             --color-ice: rgba(200, 230, 255, 0.15);
             
+            /* Default Sidebar Width */
             --sidebar-width: 320px;
+            
             --font-primary: 'Funnel Display', sans-serif;
             --font-secondary: 'DM Sans', sans-serif;
         }
@@ -33,6 +35,18 @@
             overflow: hidden;
             display: flex;
             user-select: none;
+        }
+
+        /* --- LARGE SCREENS ADAPTATION --- */
+        @media (min-width: 1600px) {
+            :root {
+                --sidebar-width: 420px; /* Wider sidebar for big screens */
+            }
+            body { font-size: 18px; }
+            .timer-display { font-size: 42px !important; }
+            .btn-primary { font-size: 20px !important; padding: 18px !important; }
+            .form-title { font-size: 16px !important; }
+            .brand-logo { max-width: 180px !important; }
         }
 
         /* --- CHRISTMAS GARLAND --- */
@@ -59,6 +73,7 @@
             display: flex; flex-direction: column; gap: 20px;
             z-index: 200; flex-shrink: 0; overflow-y: auto; 
             backdrop-filter: blur(10px);
+            transition: width 0.3s ease;
         }
 
         .brand-container {
@@ -116,7 +131,6 @@
             text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
         }
 
-        /* Main Orange Button */
         .btn-primary {
             background: var(--color-orange); color: var(--color-white); border: none; padding: 14px;
             border-radius: 50px; font-family: var(--font-primary); font-size: 16px; font-weight: 700;
@@ -131,7 +145,7 @@
         @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
         .btn-primary:hover { background: #FF5522; transform: translateY(-2px); }
 
-        /* Simple Button (For Hints) */
+        /* Simple Hint Button */
         .btn-simple {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.2);
@@ -153,37 +167,30 @@
         }
 
         /* --- HINT IMAGE STYLES --- */
-        
-        /* 1. Sidebar Hint (Desktop) */
         .sidebar-hint-box {
             display: none; 
-            margin-top: 10px;
-            border: 2px solid var(--color-orange);
-            border-radius: 8px;
+            margin-top: 15px;
+            border: 3px solid var(--color-orange); /* More visible border */
+            border-radius: 12px;
             overflow: hidden;
             animation: fadeIn 0.3s;
-            width: 100%;
+            
+            /* Making it 90% of sidebar width for better visibility */
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         .sidebar-hint-box img { width: 100%; display: block; }
         .sidebar-hint-box.visible { display: block; }
 
-        /* 2. Field Hint (Mobile) */
         #field-hint {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0; 
-            pointer-events: none; 
-            z-index: 1; 
-            transition: opacity 0.3s;
-            border-radius: 4px;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            opacity: 0; pointer-events: none; z-index: 1; transition: opacity 0.3s; border-radius: 4px;
         }
-        #field-hint.visible {
-            opacity: 0.3; /* 30% visibility */
-        }
+        #field-hint.visible { opacity: 0.3; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
 
         /* --- GAME AREA --- */
         #game-area {
@@ -227,16 +234,13 @@
             .avatar-placeholder span { font-size: 18px; }
             .avatar-placeholder small { font-size: 8px; }
             
-            .input-group:nth-child(2) { order: 2; } /* Nickname */
-            
+            .input-group:nth-child(2) { order: 2; }
             .volume-control { width: 100%; order: 3; margin-top: 0; }
-            /* Simple Button styling on mobile to fit nicely */
             .btn-simple { width: auto; order: 3; flex: 1; margin-top: 0; }
             
             .timer-display { margin-top: 0; font-size: 20px; padding: 5px 10px; min-width: 60px; order: 4; }
             .btn-primary { width: auto; flex-grow: 1; font-size: 14px; padding: 10px; order: 5; }
             
-            /* Hide Sidebar hint on mobile */
             .sidebar-hint-box { display: none !important; }
         }
 
@@ -324,7 +328,6 @@
 
     <main id="game-area">
         <img id="field-hint" src="puzzle.png" alt="Hint Background">
-        
         <div id="board-guide"></div>
     </main>
 
@@ -352,6 +355,7 @@
         const COLS = 8;
         const ROWS = 6;
         
+        // Initial values (will be recalculated)
         let BASE_SIZE = 80; 
         let TAB = 18;       
         let SNAP_DIST = 20;
@@ -429,23 +433,41 @@
         
         startBackgroundSnow();
 
+        // --- SIZE CALCULATION (Mobile vs Desktop vs Large) ---
         function calculateSizes() {
             const screenW = window.innerWidth;
-            if (screenW < 800) {
+            
+            if (screenW > 1600) {
+                // Large monitors
+                BASE_SIZE = 110; 
+                TAB = 24;
+                SNAP_DIST = 30;
+            } else if (screenW < 800) {
+                // Mobile
                 BASE_SIZE = Math.floor((screenW - 40) / COLS);
                 if (BASE_SIZE > 50) BASE_SIZE = 50;
                 TAB = BASE_SIZE * 0.22;
                 SNAP_DIST = BASE_SIZE * 0.4;
             } else {
+                // Standard Desktop
                 BASE_SIZE = 80;
                 TAB = 18;
                 SNAP_DIST = 20;
             }
         }
 
-        imgObj.onload = () => { updateGuide(); };
+        imgObj.onload = () => { 
+            calculateSizes(); // init calc
+            updateGuide(); 
+        };
         imgObj.onerror = () => { console.error("Could not load puzzle.png"); };
         
+        // Recalculate on resize
+        window.addEventListener('resize', () => {
+            calculateSizes();
+            updateGuide();
+        });
+
         function updateGuide() {
             const w = (COLS * BASE_SIZE) + 'px';
             const h = (ROWS * BASE_SIZE) + 'px';
